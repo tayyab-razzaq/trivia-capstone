@@ -1,11 +1,17 @@
 """Module for auth of app."""
 
+import json
 from functools import wraps
+from urllib.request import urlopen
 
 from flask import request
 
+from jose import jwt
+
+
 from flaskr.constants import (
-    STATUS_UNAUTHORIZED, MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN, MISSING_BEARER_TOKEN
+    STATUS_UNAUTHORIZED, MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN, MISSING_BEARER_TOKEN,
+    TOKEN_EXPIRED, INCORRECT_CLAIMS, UNABLE_TO_PARSE, STATUS_BAD_REQUEST, INAPPROPRIATE_KEY, AUTHORIZATION_MALFORMED
 )
 
 AUTH0_DOMAIN = 'dummy'
@@ -66,6 +72,54 @@ def get_token_auth_header():
     return token
 
 
+def verify_decode_jwt(token):
+    """
+    Verify if jwt can be decoded properly and is not tempered.
+
+    :param token:
+    :return:
+    """
+    unverified_header = jwt.get_unverified_header(token)
+    if 'kid' not in unverified_header:
+        raise_auth_error(AUTHORIZATION_MALFORMED)
+
+    json_url = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
+    jwks = json.loads(json_url.read())
+    rsa_key = {}
+
+    for key in jwks['keys']:
+        if key['kid'] == unverified_header['kid']:
+            rsa_key = {
+                'kty': key['kty'],
+                'kid': key['kid'],
+                'use': key['use'],
+                'n': key['n'],
+                'e': key['e']
+            }
+
+    if rsa_key:
+        try:
+            payload = jwt.decode(
+                token,
+                rsa_key,
+                algorithms=ALGORITHMS,
+                audience=API_AUDIENCE,
+                issuer='https://' + AUTH0_DOMAIN + '/'
+            )
+            return payload
+
+        except jwt.ExpiredSignatureError:
+            raise_auth_error(TOKEN_EXPIRED)
+
+        except jwt.JWTClaimsError:
+            raise_auth_error(INCORRECT_CLAIMS)
+
+        except Exception:
+            raise_auth_error(UNABLE_TO_PARSE, STATUS_BAD_REQUEST)
+
+    raise_auth_error(INAPPROPRIATE_KEY, STATUS_BAD_REQUEST)
+
+
 def requires_auth(permission=''):
     """
     Require Auth method.
@@ -92,9 +146,9 @@ def requires_auth(permission=''):
             :return:
             """
             token = get_token_auth_header()
-            # payload = verify_decode_jwt(token)
+            payload = verify_decode_jwt(token)
             # check_permissions(permission, payload)
-            # return function(payload, *args, **kwargs)
+            return function(payload, *args, **kwargs)
 
         return wrapper
 
