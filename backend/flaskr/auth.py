@@ -1,4 +1,5 @@
 """Module for auth of app."""
+from flaskr.constants import STATUS_UNAUTHORIZED
 
 
 class AuthError(Exception):
@@ -13,3 +14,17 @@ class AuthError(Exception):
         """
         self.error = error
         self.status_code = status_code
+
+
+def raise_auth_error(message, error=STATUS_UNAUTHORIZED):
+    """
+    Raise auth error with given message.
+    :param message:
+    :param error:
+    :return:
+    """
+    raise AuthError({
+        'success': False,
+        'message': message,
+        'error': error
+    }, error)
