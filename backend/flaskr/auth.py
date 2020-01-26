@@ -2,7 +2,11 @@
 
 from functools import wraps
 
-from flaskr.constants import STATUS_UNAUTHORIZED
+from flask import request
+
+from flaskr.constants import (
+    STATUS_UNAUTHORIZED, MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN, MISSING_BEARER_TOKEN
+)
 
 
 class AuthError(Exception):
@@ -34,9 +38,34 @@ def raise_auth_error(message, error=STATUS_UNAUTHORIZED):
     }, error)
 
 
+def get_token_auth_header():
+    """
+    Get token from authorization header and raise error is header is incorrect.
+
+    :return:
+    """
+    authorization = request.headers.get('Authorization')
+    if not authorization:
+        raise_auth_error(MISSING_AUTHORIZATION)
+
+    authorization_parts = authorization.split(' ')
+    if authorization_parts[0].lower() != 'bearer':
+        raise_auth_error(MISSING_BEARER)
+
+    elif len(authorization_parts) == 1:
+        raise_auth_error(MISSING_TOKEN)
+
+    elif len(authorization_parts) > 2:
+        raise_auth_error(MISSING_BEARER_TOKEN)
+
+    token = authorization_parts[1]
+    return token
+
+
 def requires_auth(permission=''):
     """
     Require Auth method.
+
     :param permission:
     :return:
     """
@@ -58,7 +87,7 @@ def requires_auth(permission=''):
             :param kwargs:
             :return:
             """
-            # token = get_token_auth_header()
+            token = get_token_auth_header()
             # payload = verify_decode_jwt(token)
             # check_permissions(permission, payload)
             # return function(payload, *args, **kwargs)
