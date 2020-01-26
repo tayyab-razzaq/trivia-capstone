@@ -8,6 +8,10 @@ from flaskr.constants import (
     STATUS_UNAUTHORIZED, MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN, MISSING_BEARER_TOKEN
 )
 
+AUTH0_DOMAIN = 'dummy'
+ALGORITHMS = ['dummy']
+API_AUDIENCE = 'dummy'
+
 
 class AuthError(Exception):
     """A standardized way to communicate auth failure modes."""
