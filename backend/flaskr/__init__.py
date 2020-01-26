@@ -6,6 +6,7 @@ from flask import Flask, abort, jsonify, request
 
 from flask_cors import CORS
 
+from flaskr.auth import AuthError
 from flaskr.constants import (
     ERROR_MESSAGES, STATUS_BAD_REQUEST, STATUS_CREATED, STATUS_FORBIDDEN,
     STATUS_INTERNAL_SERVER_ERROR, STATUS_METHOD_NOT_ALLOWED, STATUS_NOT_FOUND,
@@ -212,6 +213,16 @@ def create_app(test_config=None):
 
         except Exception as exp:
             abort(exp.code)
+
+    @app.errorhandler(AuthError)
+    def auth_error(error):
+        """
+        Error handling for our custom auth error class.
+
+        :param error:
+        :return:
+        """
+        return jsonify(error.error), error.status_code
 
     @app.errorhandler(STATUS_BAD_REQUEST)
     def bad_request(error):
