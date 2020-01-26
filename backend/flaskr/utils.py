@@ -94,3 +94,15 @@ def add_new_question(question):
     instance = Question(**question)
     instance.insert()
     return instance
+
+
+def update_question_in_db(question, question_data):
+    """
+    Update question in db by given question data.
+    :param question:
+    :param question_data:
+    :return:
+    """
+    question.title = question_data.get('title')
+    question.recipe = question_data.get('recipe')
+    question.update()
