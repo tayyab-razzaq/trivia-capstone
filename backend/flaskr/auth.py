@@ -1,4 +1,7 @@
 """Module for auth of app."""
+
+from functools import wraps
+
 from flaskr.constants import STATUS_UNAUTHORIZED
 
 
@@ -19,6 +22,7 @@ class AuthError(Exception):
 def raise_auth_error(message, error=STATUS_UNAUTHORIZED):
     """
     Raise auth error with given message.
+
     :param message:
     :param error:
     :return:
@@ -28,3 +32,37 @@ def raise_auth_error(message, error=STATUS_UNAUTHORIZED):
         'message': message,
         'error': error
     }, error)
+
+
+def requires_auth(permission=''):
+    """
+    Require Auth method.
+    :param permission:
+    :return:
+    """
+
+    def requires_auth_decorator(function):
+        """
+        Require Auth decorator.
+
+        :param function:
+        :return:
+        """
+
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            """
+            Decorate wrapper method.
+
+            :param args:
+            :param kwargs:
+            :return:
+            """
+            # token = get_token_auth_header()
+            # payload = verify_decode_jwt(token)
+            # check_permissions(permission, payload)
+            # return function(payload, *args, **kwargs)
+
+        return wrapper
+
+    return requires_auth_decorator
