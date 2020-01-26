@@ -10,8 +10,10 @@ from jose import jwt
 
 
 from flaskr.constants import (
-    STATUS_UNAUTHORIZED, MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN, MISSING_BEARER_TOKEN,
-    TOKEN_EXPIRED, INCORRECT_CLAIMS, UNABLE_TO_PARSE, STATUS_BAD_REQUEST, INAPPROPRIATE_KEY, AUTHORIZATION_MALFORMED
+    STATUS_UNAUTHORIZED, MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN,
+    MISSING_BEARER_TOKEN, ERROR_MESSAGES, TOKEN_EXPIRED,
+    INCORRECT_CLAIMS, UNABLE_TO_PARSE, STATUS_BAD_REQUEST,
+    INAPPROPRIATE_KEY, AUTHORIZATION_MALFORMED
 )
 
 AUTH0_DOMAIN = 'dummy'
@@ -120,6 +122,23 @@ def verify_decode_jwt(token):
     raise_auth_error(INAPPROPRIATE_KEY, STATUS_BAD_REQUEST)
 
 
+def check_permissions(permission, payload):
+    """
+    Check permission against a payload.
+    :param permission:
+    :param payload:
+    :return:
+    """
+    if 'permissions' in payload and permission in payload['permissions']:
+        return True
+
+    raise AuthError({
+        'success': False,
+        'error': STATUS_UNAUTHORIZED,
+        'message': ERROR_MESSAGES[STATUS_UNAUTHORIZED]
+    }, STATUS_UNAUTHORIZED)
+
+
 def requires_auth(permission=''):
     """
     Require Auth method.
@@ -147,7 +166,7 @@ def requires_auth(permission=''):
             """
             token = get_token_auth_header()
             payload = verify_decode_jwt(token)
-            # check_permissions(permission, payload)
+            check_permissions(permission, payload)
             return function(payload, *args, **kwargs)
 
         return wrapper
