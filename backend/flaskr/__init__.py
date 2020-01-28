@@ -83,6 +83,54 @@ def get_questions():
         abort(exp.code)
 
 
+@app.route('/categories/<int:category_id>/questions')
+def get_questions_by_category(category_id):
+    """
+    Get questions by category.
+
+    :param category_id:
+    :return:
+    """
+    try:
+        category = get_category_by_id(category_id)
+
+        if category is None:
+            abort(STATUS_NOT_FOUND)
+
+        questions = get_all_questions(category_id=category_id)
+        return jsonify({
+            "success": True,
+            "questions": questions,
+            "total_questions": len(questions),
+            "current_category": category.format(),
+        })
+
+    except Exception as exp:
+        abort(exp.code)
+
+
+@app.route('/questions/filter', methods=['POST'])
+def search_questions():
+    """
+    Return the list of questions filtered by given search.
+
+    :return:
+    """
+    try:
+        request_data = request.get_json()
+        questions = get_all_questions(
+            query=request_data.get('searchTerm')
+        )
+        return jsonify({
+            'success': True,
+            'questions': questions,
+            'total_questions': len(questions),
+        })
+
+    except Exception as exp:
+        abort(exp.code)
+
+
 @app.route('/questions/<int:question_id>', methods=['DELETE'])
 def delete_question(question_id):
     """
@@ -106,7 +154,7 @@ def delete_question(question_id):
 
 
 @app.route('/questions/<int:question_id>', methods=['PATCH'])
-def update_drink(question_id):
+def update_question(question_id):
     """
     Update question by given question id.
 
@@ -146,54 +194,6 @@ def add_question():
             'success': True,
             'id': instance.id
         }), STATUS_CREATED
-
-    except Exception as exp:
-        abort(exp.code)
-
-
-@app.route('/questions/filter', methods=['POST'])
-def search_questions():
-    """
-    Return the list of questions filtered by given search.
-
-    :return:
-    """
-    try:
-        request_data = request.get_json()
-        questions = get_all_questions(
-            query=request_data.get('searchTerm')
-        )
-        return jsonify({
-            'success': True,
-            'questions': questions,
-            'total_questions': len(questions),
-        })
-
-    except Exception as exp:
-        abort(exp.code)
-
-
-@app.route('/categories/<int:category_id>/questions')
-def get_questions_by_category(category_id):
-    """
-    Get questions by category.
-
-    :param category_id:
-    :return:
-    """
-    try:
-        category = get_category_by_id(category_id)
-
-        if category is None:
-            abort(STATUS_NOT_FOUND)
-
-        questions = get_all_questions(category_id=category_id)
-        return jsonify({
-            "success": True,
-            "questions": questions,
-            "total_questions": len(questions),
-            "current_category": category.format(),
-        })
 
     except Exception as exp:
         abort(exp.code)
