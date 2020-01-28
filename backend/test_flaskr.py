@@ -9,7 +9,7 @@ from flaskr import app
 from flaskr.constants import (
     ERROR_MESSAGES, STATUS_BAD_REQUEST, STATUS_CREATED, STATUS_UNAUTHORIZED,
     STATUS_METHOD_NOT_ALLOWED, STATUS_NOT_FOUND, STATUS_NO_CONTENT, STATUS_OK,
-    MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_BEARER_TOKEN,
+    MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN, MISSING_BEARER_TOKEN,
 )
 
 from models import get_database_path, setup_db
@@ -265,6 +265,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
+
+    def test_add_question_failed_no_token(self):
+        """
+        Fail case of add question test case with no token in auth.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={}, headers=self.no_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_TOKEN)
 
     def test_delete_question_success(self):
         """
