@@ -331,9 +331,9 @@ class TriviaTestCase(unittest.TestCase):
             json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
         )
 
-    def test_play_quiz_success(self):
+    def test_play_quiz_success_member_role(self):
         """
-        Success case for play quiz api.
+        Success case for play quiz api with member.
 
         :return:
         """
@@ -343,7 +343,25 @@ class TriviaTestCase(unittest.TestCase):
             },
             "previous_questions": []
         }
-        response = self.client().post('/quizzes', json=data)
+        response = self.client().post('/quizzes', json=data, headers=self.member_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_OK)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertTrue(len(json_data.get('question')))
+
+    def test_play_quiz_success_manager_role(self):
+        """
+        Success case for play quiz api with manager role.
+
+        :return:
+        """
+        data = {
+            "quiz_category": {
+                "id": 1
+            },
+            "previous_questions": []
+        }
+        response = self.client().post('/quizzes', json=data, headers=self.manager_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_OK)
         self.assertEqual(json_data.get('success'), True)
@@ -369,13 +387,61 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/quizzes', json={})
+        response = self.client().post('/quizzes', json={}, headers=self.member_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(
             json_data.get('message'), ERROR_MESSAGES[STATUS_BAD_REQUEST]
         )
+
+    def test_play_quiz_failed_no_auth(self):
+        """
+        Fail case of play quiz api test case without authorization.
+
+        :return:
+        """
+        response = self.client().post('/quizzes', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
+
+    def test_play_quiz_failed_no_bearer_token(self):
+        """
+        Fail case of play quiz api test case with no bearer token.
+
+        :return:
+        """
+        response = self.client().post('/quizzes', json={}, headers=self.no_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER)
+
+    def test_play_quiz_failed_wrong_bearer_token(self):
+        """
+        Fail case of play quiz api test case with wrong bearer token.
+
+        :return:
+        """
+        response = self.client().post('/quizzes', json={}, headers=self.wrong_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
+
+    def test_play_quiz_failed_no_token(self):
+        """
+        Fail case of play quiz api test case with no token in auth.
+
+        :return:
+        """
+        response = self.client().post('/quizzes', json={}, headers=self.no_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_TOKEN)
 
     def tearDown(self):
         """
