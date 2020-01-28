@@ -6,7 +6,7 @@ from flask import Flask, abort, jsonify, request
 
 from flask_cors import CORS
 
-from flaskr.auth import AuthError
+from flaskr.auth import AuthError, requires_auth
 from flaskr.constants import (
     ERROR_MESSAGES, STATUS_BAD_REQUEST, STATUS_CREATED, STATUS_FORBIDDEN,
     STATUS_INTERNAL_SERVER_ERROR, STATUS_METHOD_NOT_ALLOWED, STATUS_NOT_FOUND,
@@ -177,7 +177,8 @@ def update_question(question_id):
 
 
 @app.route('/questions', methods=['POST'])
-def add_question():
+@requires_auth('add-question')
+def add_question(token):
     """
     Add question to database.
 
