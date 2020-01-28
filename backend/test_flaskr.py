@@ -331,9 +331,9 @@ class TriviaTestCase(unittest.TestCase):
             json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
         )
 
-    def test_play_quiz_success(self):
+    def test_play_quiz_success_member_role(self):
         """
-        Success case for play quiz api.
+        Success case for play quiz api with member.
 
         :return:
         """
@@ -344,6 +344,24 @@ class TriviaTestCase(unittest.TestCase):
             "previous_questions": []
         }
         response = self.client().post('/quizzes', json=data, headers=self.member_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_OK)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertTrue(len(json_data.get('question')))
+
+    def test_play_quiz_success_manager_role(self):
+        """
+        Success case for play quiz api with manager role.
+
+        :return:
+        """
+        data = {
+            "quiz_category": {
+                "id": 1
+            },
+            "previous_questions": []
+        }
+        response = self.client().post('/quizzes', json=data, headers=self.manager_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_OK)
         self.assertEqual(json_data.get('success'), True)
