@@ -16,9 +16,9 @@ from flaskr.constants import (
     INAPPROPRIATE_KEY, AUTHORIZATION_MALFORMED
 )
 
-AUTH0_DOMAIN = 'dummy'
-ALGORITHMS = ['dummy']
-API_AUDIENCE = 'dummy'
+AUTH0_DOMAIN = 'kagaroatgoku.auth0.com'
+ALGORITHMS = ['RS256']
+API_AUDIENCE = 'trivia-api'
 
 
 class AuthError(Exception):
