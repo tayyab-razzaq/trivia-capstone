@@ -343,7 +343,7 @@ class TriviaTestCase(unittest.TestCase):
             },
             "previous_questions": []
         }
-        response = self.client().post('/quizzes', json=data)
+        response = self.client().post('/quizzes', json=data, headers=self.member_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_OK)
         self.assertEqual(json_data.get('success'), True)
