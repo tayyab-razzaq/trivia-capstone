@@ -407,6 +407,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
 
+    def test_play_quiz_failed_no_bearer_token(self):
+        """
+        Fail case of play quiz api test case with no bearer token.
+
+        :return:
+        """
+        response = self.client().post('/quizzes', json={}, headers=self.no_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER)
+
     def tearDown(self):
         """
         Execute after reach test.
