@@ -189,13 +189,53 @@ class TriviaTestCase(unittest.TestCase):
             json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
         )
 
+    def test_add_question_success(self):
+        """
+        Success case of add question test case.
+
+        :return:
+        """
+        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_CREATED)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertTrue(json_data.get('id'))
+
+    def test_add_question_failed_method_not_allowed(self):
+        """
+        Fail case of add question test case with method not allowed error.
+
+        :return:
+        """
+        response = self.client().put('/questions', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
+        )
+
+    def test_add_question_failed_bad_request(self):
+        """
+        Fail case of add question test case with bad request error.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={}, headers=self.manager_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_BAD_REQUEST]
+        )
+
     def test_delete_question_success(self):
         """
         Success case of delete question test case.
 
         :return:
         """
-        response = self.client().post('/questions', json=self.question)
+        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
         json_data = response.get_json()
         response = self.client().delete(f'/questions/{json_data.get("id")}')
         self.assertEqual(response.status_code, STATUS_NO_CONTENT)
@@ -226,46 +266,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(
             json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
-        )
-
-    def test_add_question_success(self):
-        """
-        Success case of add question test case.
-
-        :return:
-        """
-        response = self.client().post('/questions', json=self.question)
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_CREATED)
-        self.assertEqual(json_data.get('success'), True)
-        self.assertTrue(json_data.get('id'))
-
-    def test_add_question_failed_method_not_allowed(self):
-        """
-        Fail case of add question test case with method not allowed error.
-
-        :return:
-        """
-        response = self.client().put('/questions', json={})
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
-        )
-
-    def test_add_question_failed_bad_request(self):
-        """
-        Fail case of add question test case with bad request error.
-
-        :return:
-        """
-        response = self.client().post('/questions', json={})
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_BAD_REQUEST]
         )
 
     def test_play_quiz_success(self):
