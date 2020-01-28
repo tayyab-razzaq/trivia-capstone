@@ -4,7 +4,7 @@ import unittest
 
 from flask_sqlalchemy import SQLAlchemy
 
-from flaskr import create_app
+from flaskr import app
 from flaskr.constants import (
     ERROR_MESSAGES, STATUS_BAD_REQUEST, STATUS_CREATED,
     STATUS_METHOD_NOT_ALLOWED, STATUS_NOT_FOUND, STATUS_NO_CONTENT, STATUS_OK,
@@ -22,7 +22,7 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        self.app = create_app()
+        self.app = app
         self.client = self.app.test_client
         self.database_name = "trivia_test"
         self.database_path = get_database_path(self.database_name)
@@ -89,6 +89,78 @@ class TriviaTestCase(unittest.TestCase):
         :return:
         """
         response = self.client().get('/questions?page=-1000')
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_NOT_FOUND)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
+        )
+
+    def test_search_questions_success(self):
+        """
+        Success case of search questions api.
+
+        :return:
+        """
+        data = {
+            "searchTerm": "The"
+        }
+        response = self.client().post('/questions/filter', json=data)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_OK)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertTrue(len(json_data.get('questions')))
+        self.assertTrue(json_data.get('total_questions'))
+
+    def test_search_questions_failed(self):
+        """
+        Success case of search questions api with method not allowed error.
+
+        :return:
+        """
+        response = self.client().get('/questions/filter', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
+        )
+
+    def test_get_questions_by_category_success(self):
+        """
+        Success case for get questions by category.
+
+        :return:
+        """
+        response = self.client().get('/categories/1/questions')
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_OK)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertTrue(len(json_data.get('questions')))
+        self.assertTrue(json_data.get('total_questions'))
+        self.assertTrue(len(json_data.get('current_category')))
+
+    def test_get_questions_by_category_failed_method_not_allowed(self):
+        """
+        Fail case for get questions by category with method not allowed error.
+
+        :return:
+        """
+        response = self.client().post('/categories/1/questions')
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
+        )
+
+    def test_get_questions_by_category_not_found(self):
+        """
+        Fail case for get questions by category with method not found.
+
+        :return:
+        """
+        response = self.client().get('/categories/1000/questions')
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_NOT_FOUND)
         self.assertEqual(json_data.get('success'), False)
@@ -173,78 +245,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(
             json_data.get('message'), ERROR_MESSAGES[STATUS_BAD_REQUEST]
-        )
-
-    def test_search_questions_success(self):
-        """
-        Success case of search questions api.
-
-        :return:
-        """
-        data = {
-            "searchTerm": "The"
-        }
-        response = self.client().post('/questions/filter', json=data)
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_OK)
-        self.assertEqual(json_data.get('success'), True)
-        self.assertTrue(len(json_data.get('questions')))
-        self.assertTrue(json_data.get('total_questions'))
-
-    def test_search_questions_failed(self):
-        """
-        Success case of search questions api with method not allowed error.
-
-        :return:
-        """
-        response = self.client().get('/questions/filter', json={})
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
-        )
-
-    def test_get_questions_by_category_success(self):
-        """
-        Success case for get questions by category.
-
-        :return:
-        """
-        response = self.client().get('/categories/1/questions')
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_OK)
-        self.assertEqual(json_data.get('success'), True)
-        self.assertTrue(len(json_data.get('questions')))
-        self.assertTrue(json_data.get('total_questions'))
-        self.assertTrue(len(json_data.get('current_category')))
-
-    def test_get_questions_by_category_failed_method_not_allowed(self):
-        """
-        Fail case for get questions by category with method not allowed error.
-
-        :return:
-        """
-        response = self.client().post('/categories/1/questions')
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
-        )
-
-    def test_get_questions_by_category_not_found(self):
-        """
-        Fail case for get questions by category with method not found.
-
-        :return:
-        """
-        response = self.client().get('/categories/1000/questions')
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_NOT_FOUND)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
         )
 
     def test_play_quiz_success(self):
