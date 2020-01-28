@@ -387,7 +387,7 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/quizzes', json={})
+        response = self.client().post('/quizzes', json={}, headers=self.member_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
         self.assertEqual(json_data.get('success'), False)
