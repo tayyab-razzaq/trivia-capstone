@@ -7,8 +7,9 @@ from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import app
 from flaskr.constants import (
-    ERROR_MESSAGES, STATUS_BAD_REQUEST, STATUS_CREATED,
+    ERROR_MESSAGES, STATUS_BAD_REQUEST, STATUS_CREATED, STATUS_UNAUTHORIZED,
     STATUS_METHOD_NOT_ALLOWED, STATUS_NOT_FOUND, STATUS_NO_CONTENT, STATUS_OK,
+    MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN, MISSING_BEARER_TOKEN,
 )
 
 from models import get_database_path, setup_db
@@ -52,8 +53,8 @@ class TriviaTestCase(unittest.TestCase):
             'Authorization': 'Bearer {} fail'.format(data.get('member'))
         }
 
-        self.wrong_token = {
-            'Authorization': 'Bearer {}'.format('')
+        self.no_token = {
+            'Authorization': 'Bearer'
         }
 
         # binds the app to the current context
@@ -189,13 +190,115 @@ class TriviaTestCase(unittest.TestCase):
             json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
         )
 
+    def test_add_question_success(self):
+        """
+        Success case of add question test case.
+
+        :return:
+        """
+        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_CREATED)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertTrue(json_data.get('id'))
+
+    def test_add_question_failed_method_not_allowed(self):
+        """
+        Fail case of add question test case with method not allowed error.
+
+        :return:
+        """
+        response = self.client().put('/questions', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
+        )
+
+    def test_add_question_failed_bad_request(self):
+        """
+        Fail case of add question test case with bad request error.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={}, headers=self.manager_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_BAD_REQUEST]
+        )
+
+    def test_add_question_failed_no_auth(self):
+        """
+        Fail case of add question test case without authorization.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
+
+    def test_add_question_failed_no_bearer_token(self):
+        """
+        Fail case of add question test case with no bearer token.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={}, headers=self.no_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER)
+
+    def test_add_question_failed_wrong_bearer_token(self):
+        """
+        Fail case of add question test case with wrong bearer token.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={}, headers=self.wrong_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
+
+    def test_add_question_failed_no_token(self):
+        """
+        Fail case of add question test case with no token in auth.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={}, headers=self.no_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_TOKEN)
+
+    def test_add_question_failed_unauthorized(self):
+        """
+        Fail case of add question test case without permission on that api.
+
+        :return:
+        """
+        response = self.client().post('/questions', json={}, headers=self.member_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_UNAUTHORIZED]
+        )
+
     def test_delete_question_success(self):
         """
         Success case of delete question test case.
 
         :return:
         """
-        response = self.client().post('/questions', json=self.question)
+        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
         json_data = response.get_json()
         response = self.client().delete(f'/questions/{json_data.get("id")}')
         self.assertEqual(response.status_code, STATUS_NO_CONTENT)
@@ -226,46 +329,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(
             json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
-        )
-
-    def test_add_question_success(self):
-        """
-        Success case of add question test case.
-
-        :return:
-        """
-        response = self.client().post('/questions', json=self.question)
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_CREATED)
-        self.assertEqual(json_data.get('success'), True)
-        self.assertTrue(json_data.get('id'))
-
-    def test_add_question_failed_method_not_allowed(self):
-        """
-        Fail case of add question test case with method not allowed error.
-
-        :return:
-        """
-        response = self.client().put('/questions', json={})
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
-        )
-
-    def test_add_question_failed_bad_request(self):
-        """
-        Fail case of add question test case with bad request error.
-
-        :return:
-        """
-        response = self.client().post('/questions', json={})
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_BAD_REQUEST]
         )
 
     def test_play_quiz_success(self):
