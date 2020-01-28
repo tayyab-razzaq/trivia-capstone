@@ -131,23 +131,25 @@ def search_questions():
         abort(exp.code)
 
 
-@app.route('/questions/<int:question_id>', methods=['DELETE'])
-def delete_question(question_id):
+@app.route('/questions', methods=['POST'])
+@requires_auth('add-question')
+def add_question(token):
     """
-    Delete question by given question id.
+    Add question to database.
 
-    :param question_id:
     :return:
     """
     try:
-        question = get_question_by_id(question_id)
-        if not question:
-            abort(STATUS_NOT_FOUND)
+        question = request.get_json()
 
-        question.delete()
+        if not question:
+            abort(STATUS_BAD_REQUEST)
+
+        instance = add_new_question(question)
         return jsonify({
-            'success': True
-        }), STATUS_NO_CONTENT
+            'success': True,
+            'id': instance.id
+        }), STATUS_CREATED
 
     except Exception as exp:
         abort(exp.code)
@@ -176,32 +178,31 @@ def update_question(question_id):
         abort(exp.code)
 
 
-@app.route('/questions', methods=['POST'])
-@requires_auth('add-question')
-def add_question(token):
+@app.route('/questions/<int:question_id>', methods=['DELETE'])
+def delete_question(question_id):
     """
-    Add question to database.
+    Delete question by given question id.
 
+    :param question_id:
     :return:
     """
     try:
-        question = request.get_json()
-
+        question = get_question_by_id(question_id)
         if not question:
-            abort(STATUS_BAD_REQUEST)
+            abort(STATUS_NOT_FOUND)
 
-        instance = add_new_question(question)
+        question.delete()
         return jsonify({
-            'success': True,
-            'id': instance.id
-        }), STATUS_CREATED
+            'success': True
+        }), STATUS_NO_CONTENT
 
     except Exception as exp:
         abort(exp.code)
 
 
 @app.route('/quizzes', methods=['POST'])
-def play_quiz():
+@requires_auth('play-quiz')
+def play_quiz(token):
     """
     Play quiz route to get questions for quizzes.
 
