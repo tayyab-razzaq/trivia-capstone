@@ -395,6 +395,18 @@ class TriviaTestCase(unittest.TestCase):
             json_data.get('message'), ERROR_MESSAGES[STATUS_BAD_REQUEST]
         )
 
+    def test_play_quiz_failed_no_auth(self):
+        """
+        Fail case of play quiz api test case without authorization.
+
+        :return:
+        """
+        response = self.client().post('/quizzes', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
+
     def tearDown(self):
         """
         Execute after reach test.
