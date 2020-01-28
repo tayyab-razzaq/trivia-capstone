@@ -1,5 +1,6 @@
 """Module for tests."""
 
+import json
 import unittest
 
 from flask_sqlalchemy import SQLAlchemy
@@ -33,6 +34,26 @@ class TriviaTestCase(unittest.TestCase):
             "answer": "Answer 1",
             "category": 1,
             "difficulty": 1
+        }
+        with open('./tokens.json') as json_file:
+            data = json.load(json_file)
+            self.member_headers = {
+                'Authorization': 'Bearer {}'.format(data.get('member'))
+            }
+            self.manager_headers = {
+                'Authorization': 'Bearer {}'.format(data.get('manager'))
+            }
+
+        self.no_bearer_token = {
+            'Authorization': '{}'.format(data.get('member'))
+        }
+
+        self.wrong_bearer_token = {
+            'Authorization': 'Bearer {} fail'.format(data.get('member'))
+        }
+
+        self.wrong_token = {
+            'Authorization': 'Bearer {}'.format('')
         }
 
         # binds the app to the current context
