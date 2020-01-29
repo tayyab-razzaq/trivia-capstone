@@ -347,6 +347,19 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
 
+    def test_update_question_failed_no_bearer_token(self):
+        """
+        Fail case of update question test case with no bearer token.
+
+        :return:
+        """
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.no_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER)
+
     def test_delete_question_success(self):
         """
         Success case of delete question test case.
