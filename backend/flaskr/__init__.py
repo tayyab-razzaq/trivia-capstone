@@ -182,10 +182,12 @@ def update_question(token, question_id):
 
 
 @app.route('/questions/<int:question_id>', methods=['DELETE'])
-def delete_question(question_id):
+@requires_auth('delete-question')
+def delete_question(token, question_id):
     """
     Delete question by given question id.
 
+    :param token:
     :param question_id:
     :return:
     """

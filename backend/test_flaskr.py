@@ -413,18 +413,20 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
-        json_data = response.get_json()
-        response = self.client().delete(f'/questions/{json_data.get("id")}')
+        save_response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
+        question_id = save_response.get_json().get('id')
+        response = self.client().delete(
+            f'/questions/{question_id}', headers=self.manager_headers)
         self.assertEqual(response.status_code, STATUS_NO_CONTENT)
 
     def test_delete_question_failed_method_not_allowed(self):
         """
-        Method not allowed failed case of delete question test case.
+        Fail case of delete question test case with method not allowed error.
 
         :return:
         """
-        response = self.client().get('/questions/14')
+        response = self.client().put('/questions/1')
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
         self.assertEqual(json_data.get('success'), False)
@@ -438,12 +440,75 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().delete('/questions/-1000')
+        response = self.client().delete(
+            '/questions/-1000', headers=self.manager_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_NOT_FOUND)
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(
             json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
+        )
+
+    def test_delete_question_failed_no_auth(self):
+        """
+        Fail case of delete question test case without authorization.
+
+        :return:
+        """
+        response = self.client().delete('/questions/1')
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
+
+    def test_delete_question_failed_no_bearer_token(self):
+        """
+        Fail case of delete question test case with no bearer token.
+
+        :return:
+        """
+        response = self.client().delete('/questions/1', headers=self.no_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER)
+
+    def test_delete_question_failed_wrong_bearer_token(self):
+        """
+        Fail case of delete question test case with wrong bearer token.
+
+        :return:
+        """
+        response = self.client().delete('/questions/1', headers=self.wrong_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
+
+    def test_delete_question_failed_no_token(self):
+        """
+        Fail case of delete question test case with no token in auth.
+
+        :return:
+        """
+        response = self.client().delete('/questions/1', headers=self.no_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_TOKEN)
+
+    def test_delete_question_failed_unauthorized(self):
+        """
+        Fail case of delete question test case without permission on that api.
+
+        :return:
+        """
+        response = self.client().delete('/questions/1', headers=self.member_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_UNAUTHORIZED]
         )
 
     def test_play_quiz_success_member_role(self):
