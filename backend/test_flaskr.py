@@ -392,6 +392,21 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(json_data.get('message'), MISSING_TOKEN)
 
+    def test_update_question_failed_unauthorized(self):
+        """
+        Fail case of update question test case without permission on that api.
+
+        :return:
+        """
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.member_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_UNAUTHORIZED]
+        )
+
     def test_delete_question_success(self):
         """
         Success case of delete question test case.
