@@ -420,6 +420,20 @@ class TriviaTestCase(unittest.TestCase):
             f'/questions/{question_id}', headers=self.manager_headers)
         self.assertEqual(response.status_code, STATUS_NO_CONTENT)
 
+    def test_delete_question_failed_method_not_allowed(self):
+        """
+        Fail case of delete question test case with method not allowed error.
+
+        :return:
+        """
+        response = self.client().put('/questions/1')
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
+        )
+
     def test_play_quiz_success_member_role(self):
         """
         Success case for play quiz api with member.
