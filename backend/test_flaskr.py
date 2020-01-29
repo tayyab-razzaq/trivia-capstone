@@ -204,7 +204,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
+        response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_CREATED)
         self.assertEqual(json_data.get('success'), True)
@@ -230,7 +231,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.manager_headers)
+        response = self.client().post(
+            '/questions', json={}, headers=self.manager_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
         self.assertEqual(json_data.get('success'), False)
@@ -256,7 +258,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.no_bearer_token)
+        response = self.client().post(
+            '/questions', json={}, headers=self.no_bearer_token)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
@@ -268,7 +271,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.wrong_bearer_token)
+        response = self.client().post(
+            '/questions', json={}, headers=self.wrong_bearer_token)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
@@ -280,7 +284,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.no_token)
+        response = self.client().post(
+            '/questions', json={}, headers=self.no_token)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
@@ -292,7 +297,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.member_headers)
+        response = self.client().post(
+            '/questions', json={}, headers=self.member_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
@@ -359,6 +365,19 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(json_data.get('message'), MISSING_BEARER)
+
+    def test_update_question_failed_wrong_bearer_token(self):
+        """
+        Fail case of update question test case with wrong bearer token.
+
+        :return:
+        """
+        response = self.client().post(
+            '/questions', json={}, headers=self.wrong_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
 
     def test_delete_question_success(self):
         """
