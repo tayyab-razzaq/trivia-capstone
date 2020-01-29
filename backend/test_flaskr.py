@@ -485,6 +485,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
 
+    def test_delete_question_failed_no_token(self):
+        """
+        Fail case of delete question test case with no token in auth.
+
+        :return:
+        """
+        response = self.client().delete('/questions/1', headers=self.no_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_TOKEN)
+
     def test_play_quiz_success_member_role(self):
         """
         Success case for play quiz api with member.
