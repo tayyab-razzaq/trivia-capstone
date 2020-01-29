@@ -413,38 +413,12 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
-        json_data = response.get_json()
-        response = self.client().delete(f'/questions/{json_data.get("id")}')
+        save_response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
+        question_id = save_response.get_json().get('id')
+        response = self.client().delete(
+            f'/questions/{question_id}', headers=self.manager_headers)
         self.assertEqual(response.status_code, STATUS_NO_CONTENT)
-
-    def test_delete_question_failed_method_not_allowed(self):
-        """
-        Method not allowed failed case of delete question test case.
-
-        :return:
-        """
-        response = self.client().get('/questions/14')
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
-        )
-
-    def test_delete_question_failed_not_found(self):
-        """
-        Not found failed case of delete question test case.
-
-        :return:
-        """
-        response = self.client().delete('/questions/-1000')
-        json_data = response.get_json()
-        self.assertEqual(response.status_code, STATUS_NOT_FOUND)
-        self.assertEqual(json_data.get('success'), False)
-        self.assertEqual(
-            json_data.get('message'), ERROR_MESSAGES[STATUS_NOT_FOUND]
-        )
 
     def test_play_quiz_success_member_role(self):
         """
