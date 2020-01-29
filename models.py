@@ -2,6 +2,11 @@
 
 from flask_sqlalchemy import SQLAlchemy
 
+from settings import (
+    SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS,
+    TEST_SQLALCHEMY_DATABASE_URI
+)
+
 from sqlalchemy import Column, Integer, String
 
 database_name = "trivia"
@@ -24,16 +29,19 @@ def get_database_path(db_name=database_name, is_postgres_user=False):
         'postgres', 'postgres', 'localhost:5432', db_name)
 
 
-def setup_db(app, database_uri=get_database_path()):
+def setup_db(app, is_test=False):
     """
     Bind a flask application and a SQLAlchemy service.
 
     :param app:
-    :param database_uri:
+    :param is_test:
     :return:
     """
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    db_url = TEST_SQLALCHEMY_DATABASE_URI \
+        if is_test else SQLALCHEMY_DATABASE_URI
+    app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = \
+        SQLALCHEMY_TRACK_MODIFICATIONS
     db.app = app
     db.init_app(app)
     db.create_all()

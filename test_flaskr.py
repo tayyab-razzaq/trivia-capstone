@@ -27,9 +27,7 @@ class TriviaTestCase(unittest.TestCase):
         """
         self.app = app
         self.client = self.app.test_client
-        self.database_name = "trivia_test"
-        self.database_path = get_database_path(self.database_name)
-        setup_db(self.app, self.database_path)
+        setup_db(self.app, is_test=True)
 
         self.question = {
             "question": "Test 1",
