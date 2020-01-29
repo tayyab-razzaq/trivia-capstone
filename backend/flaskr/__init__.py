@@ -18,7 +18,7 @@ from flaskr.utils import (
     update_question_in_db
 )
 
-from models import setup_db, Question
+from models import Question, setup_db
 
 app = Flask(__name__)
 setup_db(app)
@@ -28,6 +28,12 @@ CORS(app, resources={r"*": {"origins": "*"}})
 
 @app.after_request
 def after_request(response):
+    """
+    After request method to add headers.
+
+    :param response:
+    :return:
+    """
     response.headers.add(
         'Access-Control-Allow-Headers',
         'Content-Type, Authorization'
