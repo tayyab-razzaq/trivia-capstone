@@ -310,7 +310,7 @@ class TriviaTestCase(unittest.TestCase):
             '/questions', json=self.question, headers=self.manager_headers)
         question_id = response.get_json().get('id')
         response = self.client().patch(
-            '/questions/{}'.format(question_id),
+            f'/questions/{question_id}',
             json=self.updated_question, headers=self.manager_headers)
         json_data = response.get_json()
         updated_questions = {**self.updated_question, "id": question_id}
@@ -324,13 +324,28 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().put('/questions', json={})
+        response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
+        question_id = response.get_json().get('id')
+        response = self.client().put(f'/questions/{question_id}', json={})
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(
             json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
         )
+
+    def test_update_question_failed_no_auth(self):
+        """
+        Fail case of update question test case without authorization.
+
+        :return:
+        """
+        response = self.client().patch('/questions/1', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
 
     def test_delete_question_success(self):
         """
