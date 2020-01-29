@@ -6,15 +6,14 @@ from urllib.request import urlopen
 
 from flask import request
 
-from jose import jwt
-
-
 from flaskr.constants import (
-    STATUS_UNAUTHORIZED, MISSING_AUTHORIZATION, MISSING_BEARER, MISSING_TOKEN,
-    MISSING_BEARER_TOKEN, ERROR_MESSAGES, TOKEN_EXPIRED,
-    INCORRECT_CLAIMS, UNABLE_TO_PARSE, STATUS_BAD_REQUEST,
-    INAPPROPRIATE_KEY, AUTHORIZATION_MALFORMED
+    AUTHORIZATION_MALFORMED, ERROR_MESSAGES, INAPPROPRIATE_KEY,
+    INCORRECT_CLAIMS, MISSING_AUTHORIZATION, MISSING_BEARER,
+    MISSING_BEARER_TOKEN, MISSING_TOKEN, STATUS_BAD_REQUEST,
+    STATUS_UNAUTHORIZED, TOKEN_EXPIRED, UNABLE_TO_PARSE
 )
+
+from jose import jwt
 
 AUTH0_DOMAIN = 'kagaroatgoku.auth0.com'
 ALGORITHMS = ['RS256']
@@ -125,6 +124,7 @@ def verify_decode_jwt(token):
 def check_permissions(permission, payload):
     """
     Check permission against a payload.
+
     :param permission:
     :param payload:
     :return:
