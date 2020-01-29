@@ -605,6 +605,20 @@ To run the tests from file, run
 dropdb trivia_test
 createdb trivia_test
 psql trivia_test < trivia.psql
-export DATABASE_URL=postgres://postgres:postgres@localhost:5432/trivia_test
+export TEST_DATABASE_URL=postgres://postgres:postgres@localhost:5432/trivia_test
 python test_flaskr.py
 ```
+
+`TEST_DATABASE_URL` can be different on different environment so choose value of that variable according to your machine.
+
+To test the endpoint hosted at heroku use the tokens from the `tokens.json` file
+
+or use the below link to fetch the updated tokens
+
+`https://kagaroatgoku.auth0.com/authorize?audience=trivia-api&response_type=token&client_id=0cakHerqB1NapAVD0th3RJEjNsDsUBsU&redirect_uri=http://localhost:8000/login-results`
+
+User with email `fsnd-capstone-manager@gmail.com` is assigned the `Manager` role
+User with email `fsnd-capstone-member@gmail.com` is assigned the `Member` role
+
+Heroku app is deployed at https://trivia-api-capstone.herokuapp.com/
+
