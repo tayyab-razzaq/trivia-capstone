@@ -36,6 +36,14 @@ class TriviaTestCase(unittest.TestCase):
             "category": 1,
             "difficulty": 1
         }
+
+        self.updated_question = {
+            "question": "Test 2",
+            "answer": "Answer 2",
+            "category": 2,
+            "difficulty": 2
+        }
+
         with open('./tokens.json') as json_file:
             data = json.load(json_file)
             self.member_headers = {
@@ -291,6 +299,24 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(
             json_data.get('message'), ERROR_MESSAGES[STATUS_UNAUTHORIZED]
         )
+
+    def test_update_question_success(self):
+        """
+        Success case of update question test case.
+
+        :return:
+        """
+        response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
+        question_id = response.get_json().get('id')
+        response = self.client().patch(
+            '/questions/{}'.format(question_id),
+            json=self.updated_question, headers=self.manager_headers)
+        json_data = response.get_json()
+        updated_questions = {**self.updated_question, "id": question_id}
+        self.assertEqual(response.status_code, STATUS_OK)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertEqual(json_data.get('question'), updated_questions)
 
     def test_delete_question_success(self):
         """
