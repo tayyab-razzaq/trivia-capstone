@@ -248,6 +248,38 @@ Response
 }
 ```
 
+PATCH `'/questions<int:question_id>'`
+
+- Update the based on given question id.
+- Request Arguments: questions_id(Question Id)
+- Request Body: question, answer, difficulty and category.
+- Returns: true and question id with status 200 if successfully updated.
+
+Request
+
+id=1
+```json5
+
+{
+    "question": "Test 2",
+    "answer": "Answer 2",
+    "category": 1,
+    "difficulty": 1
+}
+```
+
+Response
+
+```json5
+{
+    "question": "Test 2",
+    "answer": "Answer 2",
+    "category": 1,
+    "difficulty": 1,
+    "id": 1
+}
+```
+
 POST `'/questions/filter'`
 
 - Searches for the questions
