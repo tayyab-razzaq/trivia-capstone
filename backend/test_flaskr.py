@@ -372,12 +372,25 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post(
-            '/questions', json={}, headers=self.wrong_bearer_token)
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.wrong_bearer_token)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
         self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
+
+    def test_update_question_failed_no_token(self):
+        """
+        Fail case of update question test case with no token in auth.
+
+        :return:
+        """
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.no_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_TOKEN)
 
     def test_delete_question_success(self):
         """
