@@ -318,6 +318,20 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(json_data.get('success'), True)
         self.assertEqual(json_data.get('question'), updated_questions)
 
+    def test_update_question_failed_method_not_allowed(self):
+        """
+        Fail case of update question test case with method not allowed error.
+
+        :return:
+        """
+        response = self.client().put('/questions', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
+        )
+
     def test_delete_question_success(self):
         """
         Success case of delete question test case.
