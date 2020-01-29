@@ -137,6 +137,7 @@ def add_question(token):
     """
     Add question to database.
 
+    :param token:
     :return:
     """
     try:
@@ -156,10 +157,12 @@ def add_question(token):
 
 
 @app.route('/questions/<int:question_id>', methods=['PATCH'])
-def update_question(question_id):
+@requires_auth('update-question')
+def update_question(token, question_id):
     """
     Update question by given question id.
 
+    :param token:
     :param question_id:
     :return:
     """
@@ -206,6 +209,7 @@ def play_quiz(token):
     """
     Play quiz route to get questions for quizzes.
 
+    :param token:
     :return:
     """
     try:

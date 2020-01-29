@@ -36,6 +36,14 @@ class TriviaTestCase(unittest.TestCase):
             "category": 1,
             "difficulty": 1
         }
+
+        self.updated_question = {
+            "question": "Test 2",
+            "answer": "Answer 2",
+            "category": 2,
+            "difficulty": 2
+        }
+
         with open('./tokens.json') as json_file:
             data = json.load(json_file)
             self.member_headers = {
@@ -196,7 +204,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json=self.question, headers=self.manager_headers)
+        response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_CREATED)
         self.assertEqual(json_data.get('success'), True)
@@ -222,7 +231,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.manager_headers)
+        response = self.client().post(
+            '/questions', json={}, headers=self.manager_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_BAD_REQUEST)
         self.assertEqual(json_data.get('success'), False)
@@ -248,7 +258,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.no_bearer_token)
+        response = self.client().post(
+            '/questions', json={}, headers=self.no_bearer_token)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
@@ -260,7 +271,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.wrong_bearer_token)
+        response = self.client().post(
+            '/questions', json={}, headers=self.wrong_bearer_token)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
@@ -272,7 +284,8 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.no_token)
+        response = self.client().post(
+            '/questions', json={}, headers=self.no_token)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)
@@ -284,7 +297,109 @@ class TriviaTestCase(unittest.TestCase):
 
         :return:
         """
-        response = self.client().post('/questions', json={}, headers=self.member_headers)
+        response = self.client().post(
+            '/questions', json={}, headers=self.member_headers)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_UNAUTHORIZED]
+        )
+
+    def test_update_question_success(self):
+        """
+        Success case of update question test case.
+
+        :return:
+        """
+        response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
+        question_id = response.get_json().get('id')
+        response = self.client().patch(
+            f'/questions/{question_id}',
+            json=self.updated_question, headers=self.manager_headers)
+        json_data = response.get_json()
+        updated_questions = {**self.updated_question, "id": question_id}
+        self.assertEqual(response.status_code, STATUS_OK)
+        self.assertEqual(json_data.get('success'), True)
+        self.assertEqual(json_data.get('question'), updated_questions)
+
+    def test_update_question_failed_method_not_allowed(self):
+        """
+        Fail case of update question test case with method not allowed error.
+
+        :return:
+        """
+        response = self.client().post(
+            '/questions', json=self.question, headers=self.manager_headers)
+        question_id = response.get_json().get('id')
+        response = self.client().put(f'/questions/{question_id}', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_METHOD_NOT_ALLOWED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(
+            json_data.get('message'), ERROR_MESSAGES[STATUS_METHOD_NOT_ALLOWED]
+        )
+
+    def test_update_question_failed_no_auth(self):
+        """
+        Fail case of update question test case without authorization.
+
+        :return:
+        """
+        response = self.client().patch('/questions/1', json={})
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_AUTHORIZATION)
+
+    def test_update_question_failed_no_bearer_token(self):
+        """
+        Fail case of update question test case with no bearer token.
+
+        :return:
+        """
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.no_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER)
+
+    def test_update_question_failed_wrong_bearer_token(self):
+        """
+        Fail case of update question test case with wrong bearer token.
+
+        :return:
+        """
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.wrong_bearer_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_BEARER_TOKEN)
+
+    def test_update_question_failed_no_token(self):
+        """
+        Fail case of update question test case with no token in auth.
+
+        :return:
+        """
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.no_token)
+        json_data = response.get_json()
+        self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
+        self.assertEqual(json_data.get('success'), False)
+        self.assertEqual(json_data.get('message'), MISSING_TOKEN)
+
+    def test_update_question_failed_unauthorized(self):
+        """
+        Fail case of update question test case without permission on that api.
+
+        :return:
+        """
+        response = self.client().patch(
+            '/questions/1', json={}, headers=self.member_headers)
         json_data = response.get_json()
         self.assertEqual(response.status_code, STATUS_UNAUTHORIZED)
         self.assertEqual(json_data.get('success'), False)

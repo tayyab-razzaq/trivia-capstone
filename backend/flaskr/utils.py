@@ -99,10 +99,13 @@ def add_new_question(question):
 def update_question_in_db(question, question_data):
     """
     Update question in db by given question data.
+
     :param question:
     :param question_data:
     :return:
     """
-    question.title = question_data.get('title')
-    question.recipe = question_data.get('recipe')
+    question.question = question_data.get('question')
+    question.answer = question_data.get('answer')
+    question.category = question_data.get('category')
+    question.difficulty = question_data.get('difficulty')
     question.update()
