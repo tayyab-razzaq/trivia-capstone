@@ -32,7 +32,7 @@ def after_request(response):
     After request method to add headers.
 
     :param response:
-    :return:
+    :return: response with extra headers
     """
     response.headers.add(
         'Access-Control-Allow-Headers',
@@ -50,7 +50,8 @@ def get_categories():
     """
     Return the categories with id and type.
 
-    :return:
+    :return: raise error in case of error otherwise
+    json with categories and success status
     """
     try:
         result = {
@@ -66,9 +67,11 @@ def get_categories():
 @app.route('/questions')
 def get_questions():
     """
-    Get questions by given page number.
+    Get questions by given page number, raise 404 if questions not found.
 
-    :return:
+    :return: raise error in case of error otherwise
+    json with questions, categories, current category,
+    total questions and success status
     """
     try:
         page = request.args.get('page', 1, type=int)
@@ -92,10 +95,11 @@ def get_questions():
 @app.route('/categories/<int:category_id>/questions')
 def get_questions_by_category(category_id):
     """
-    Get questions by category.
+    Get questions by category id raise 404 if category not found.
 
-    :param category_id:
-    :return:
+    :param category_id: integer containing category id
+    :return: raise error in case of error otherwise
+    json with questions, total/current categories and success status
     """
     try:
         category = get_category_by_id(category_id)
@@ -120,7 +124,8 @@ def search_questions():
     """
     Return the list of questions filtered by given search.
 
-    :return:
+    :return: raise error in case of error otherwise
+    json with questions, total questions and success status
     """
     try:
         request_data = request.get_json()
@@ -141,10 +146,11 @@ def search_questions():
 @requires_auth('add-question')
 def add_question(token):
     """
-    Add question to database.
+    Add question to database or raise 400 if question data is incomplete.
 
     :param token:
-    :return:
+    :return: raise error in case of error otherwise
+    json with id and success status
     """
     try:
         question = request.get_json()
@@ -166,11 +172,12 @@ def add_question(token):
 @requires_auth('update-question')
 def update_question(token, question_id):
     """
-    Update question by given question id.
+    Update question by given question id or raise 404 if question not found.
 
     :param token:
     :param question_id:
-    :return:
+    :return: raise error in case of error otherwise
+    json with question and success status
     """
     try:
         question = Question.query.filter_by(id=question_id).first()
@@ -191,11 +198,11 @@ def update_question(token, question_id):
 @requires_auth('delete-question')
 def delete_question(token, question_id):
     """
-    Delete question by given question id.
+    Delete question by given question id or raise 404 if question not found.
 
     :param token:
     :param question_id:
-    :return:
+    :return: raise error in case of error otherwise json with success status
     """
     try:
         question = get_question_by_id(question_id)
@@ -217,8 +224,11 @@ def play_quiz(token):
     """
     Play quiz route to get questions for quizzes.
 
-    :param token:
-    :return:
+    or raise bad request if quiz category not found.
+
+    :param token: string
+    :return: raise error in case of error otherwise
+    json with question and success status
     """
     try:
         request_data = request.get_json()
@@ -258,7 +268,7 @@ def auth_error(error):
     """
     Error handling for our custom auth error class.
 
-    :param error:
+    :param error: instance on AuthError class
     :return:
     """
     return jsonify(error.error), error.status_code
