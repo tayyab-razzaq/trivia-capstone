@@ -21,23 +21,21 @@ export default class QuestionView extends Component {
         this.getQuestions();
     }
 
-    getQuestions = () => {
-        $.ajax({
-            url: `/questions?page=${this.state.page}`,
-            type: 'GET',
-            success: result => {
-                this.setState({
-                    questions: result.questions,
-                    totalQuestions: result['total_questions'],
-                    categories: result.categories,
-                    currentCategory: result['current_category']
-                });
-            },
-            error: () => {
-                alert('Unable to load questions. Please try your request again');
-            }
-        })
-    };
+    getQuestions = () => $.ajax({
+        url: `/questions?page=${this.state.page}`,
+        type: 'GET',
+        success: result => {
+            this.setState({
+                questions: result.questions,
+                totalQuestions: result['total_questions'],
+                categories: result.categories,
+                currentCategory: result['current_category']
+            });
+        },
+        error: () => {
+            alert('Unable to load questions. Please try your request again');
+        }
+    });
 
     selectPage = num => this.setState({ page: num }, this.getQuestions);
 
@@ -56,46 +54,42 @@ export default class QuestionView extends Component {
         return pageNumbers;
     };
 
-    getByCategory = id => {
-        $.ajax({
-            url: `/categories/${id}/questions`,
-            type: 'GET',
-            success: result => {
-                this.setState({
-                    questions: result.questions,
-                    totalQuestions: result['total_questions'],
-                    currentCategory: result['current_category']
-                });
-            },
-            error: () => {
-                alert('Unable to load questions. Please try your request again');
-            }
-        })
-    };
+    getByCategory = id => $.ajax({
+        url: `/categories/${id}/questions`,
+        type: 'GET',
+        success: result => {
+            this.setState({
+                questions: result.questions,
+                totalQuestions: result['total_questions'],
+                currentCategory: result['current_category']
+            });
+        },
+        error: () => {
+            alert('Unable to load questions. Please try your request again');
+        }
+    });
 
-    submitSearch = (searchTerm) => {
-        $.ajax({
-            url: `/questions/filter`,
-            type: 'POST',
-            dataType: 'json',
-            contentType: 'application/json',
-            data: JSON.stringify({ searchTerm: searchTerm }),
-            xhrFields: {
-                withCredentials: true
-            },
-            crossDomain: true,
-            success: result => {
-                this.setState({
-                    questions: result.questions,
-                    totalQuestions: result['total_questions'],
-                    currentCategory: result['current_category']
-                });
-            },
-            error: () => {
-                alert('Unable to load questions. Please try your request again');
-            }
-        })
-    };
+    submitSearch = (searchTerm) => $.ajax({
+        url: `/questions/filter`,
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ searchTerm: searchTerm }),
+        xhrFields: {
+            withCredentials: true
+        },
+        crossDomain: true,
+        success: result => {
+            this.setState({
+                questions: result.questions,
+                totalQuestions: result['total_questions'],
+                currentCategory: result['current_category']
+            });
+        },
+        error: () => {
+            alert('Unable to load questions. Please try your request again');
+        }
+    });
 
     questionAction = id => action => {
         if (action === 'DELETE') {
